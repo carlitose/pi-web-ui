@@ -439,7 +439,9 @@ export function createBridgeApp(options: { context: BridgeStartContext; pid?: nu
         port: options.context.port,
         browserClients: clients.count(),
         session: sessions.getCurrentSession(),
-        sdkSession,
+        // Readiness only: /status serializes this object, and the SDK session carries the
+        // whole Pi profile (system prompt, tools, skills), several megabytes.
+        sdkReady: sdkSession !== undefined,
       };
     },
     async handleClientCommand(command: ClientCommand) {

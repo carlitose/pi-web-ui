@@ -91,7 +91,7 @@ From a Pi terminal session, run:
 /pi-web-ui start
 ```
 
-This spawns the local bridge on port `43117` and opens Chrome with the side panel.
+This spawns the local bridge on port `43117` and opens Chrome with the side panel. The bridge loads your Pi profile (extensions, skills, models) before it answers, so `start` waits up to 60 seconds; a large profile takes about 20.
 
 ### 2. Open the Side Panel
 

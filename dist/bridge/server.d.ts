@@ -23,7 +23,7 @@ export declare function createBridgeApp(options: {
         port: number;
         browserClients: number;
         session: import("../protocol/sessions.js").SessionState | undefined;
-        sdkSession: unknown;
+        sdkReady: boolean;
     };
     handleClientCommand(command: ClientCommand): Promise<import("../protocol/sessions.js").SessionState | {
         handled: boolean;

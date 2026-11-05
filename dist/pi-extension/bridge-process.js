@@ -43,7 +43,9 @@ async function resolveHostPiEntry() {
     return external ?? candidates.find(Boolean);
 }
 const READY_POLL_INTERVAL_MS = 200;
-const READY_TIMEOUT_MS = 10000;
+// The bridge listens only after its SDK session has loaded the whole Pi profile:
+// about 20 s on a full Windows profile, so 10 s reported a failure for a healthy bridge.
+const READY_TIMEOUT_MS = 60000;
 export function defaultBridgeEntryPath() {
     const here = dirname(fileURLToPath(import.meta.url));
     // When loaded from dist/ (npm install): ../bridge/server.js → dist/bridge/server.js

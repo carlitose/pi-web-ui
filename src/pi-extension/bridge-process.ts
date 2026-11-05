@@ -66,7 +66,9 @@ type Spawn = (command: string, args: string[], options: Parameters<typeof nodeSp
 type StatusProbe = (port: number) => Promise<BridgeStatus>;
 
 const READY_POLL_INTERVAL_MS = 200;
-const READY_TIMEOUT_MS = 10000;
+// The bridge listens only after its SDK session has loaded the whole Pi profile:
+// about 20 s on a full Windows profile, so 10 s reported a failure for a healthy bridge.
+const READY_TIMEOUT_MS = 60000;
 
 export function defaultBridgeEntryPath(): string {
   const here = dirname(fileURLToPath(import.meta.url));

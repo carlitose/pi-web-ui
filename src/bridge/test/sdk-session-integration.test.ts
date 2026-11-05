@@ -16,6 +16,7 @@ describe('bridge SDK session integration', () => {
       create: vi.fn().mockResolvedValue({
         prompt: vi.fn().mockResolvedValue(undefined),
         subscribe: vi.fn().mockReturnValue(() => {}),
+        systemPrompt: 'SESSION-CONTENT-MARKER',
       }),
     };
 
@@ -23,12 +24,16 @@ describe('bridge SDK session integration', () => {
       context: { cwd: '/project', cookieAccessEnabled: false, storageAccessEnabled: false, port: 0 },
       sdkHost,
     });
+    expect(app.status().sdkReady).toBe(false);
 
     // Wait for SDK session to be created
     await app.ready;
 
     const status = app.status();
-    expect(status.sdkSession).toBeDefined();
+    expect(status.sdkReady).toBe(true);
+    // /status serializes this object: it reports readiness, never the session itself.
+    expect(status).not.toHaveProperty('sdkSession');
+    expect(JSON.stringify(status)).not.toContain('SESSION-CONTENT-MARKER');
     expect(sdkHost.create).toHaveBeenCalledWith({ cwd: '/project', sessionPath: undefined });
   });
 

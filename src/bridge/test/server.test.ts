@@ -17,7 +17,9 @@ describe('bridge app', () => {
       port: 43117,
       browserClients: 0,
       session: expect.objectContaining({ cwd: '/project' }),
+      sdkReady: false,
     });
+    expect(app.status()).not.toHaveProperty('sdkSession');
   });
 
   it('handles side panel commands by updating session state', async () => {

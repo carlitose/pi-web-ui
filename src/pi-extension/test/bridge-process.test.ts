@@ -104,6 +104,45 @@ describe('bridge process manager', () => {
     })).rejects.toThrow('Bridge did not become ready');
   }, 5000);
 
+  it('waits by default for a bridge that takes 20 seconds to load the Pi profile', async () => {
+    vi.useFakeTimers();
+    try {
+      const startedAt = Date.now();
+      const manager = createBridgeProcessManager({
+        spawn: vi.fn(() => mockChild(999)),
+        statusProbe: vi.fn(async () => (Date.now() - startedAt >= 20_000 ? { running: true, pid: 999, port: 43117 } : { running: false })),
+        bridgeEntryPath: '/ext/dist/bridge/server.js',
+        resolveHostPiEntry: () => undefined,
+      });
+
+      const outcome = expect(manager.start({ cwd: '/project', cookieAccessEnabled: false, storageAccessEnabled: false, port: 43117 }))
+        .resolves.toEqual({ pid: 999, port: 43117, alreadyRunning: false });
+      await vi.advanceTimersByTimeAsync(20_400);
+      await outcome;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('gives up after 60 seconds by default', async () => {
+    vi.useFakeTimers();
+    try {
+      const manager = createBridgeProcessManager({
+        spawn: vi.fn(() => mockChild(999)),
+        statusProbe: vi.fn(async () => ({ running: false })),
+        bridgeEntryPath: '/ext/dist/bridge/server.js',
+        resolveHostPiEntry: () => undefined,
+      });
+
+      const outcome = expect(manager.start({ cwd: '/project', cookieAccessEnabled: false, storageAccessEnabled: false, port: 43117 }))
+        .rejects.toThrow('within 60000ms');
+      await vi.advanceTimersByTimeAsync(60_400);
+      await outcome;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('includes stderr in error when bridge fails to start', async () => {
     let stderrCallback: ((data: Buffer) => void) | undefined;
     const spawn = vi.fn(() => {
