@@ -65,6 +65,8 @@ pi-web-ui is the **server-side bridge** that connects three pieces:
 pi install npm:@isr4el-silv4/pi-web-ui
 ```
 
+**From a Git archive.** `dist/` is versioned, so an install from a GitHub archive or Git ref gets the compiled bridge without a build step. After changing `src/`, run `npm run build:dist` and commit `dist/`; `npm run check:dist` fails when `dist/` differs from a fresh build.
+
 ### Chrome Extension Setup
 
 **From the Chrome Web Store:** [Here](https://chromewebstore.google.com/detail/pi-coding-agent-web-ui/clhbmkkjcoknpbkicpfalmapgogeikhi?hl=en&authuser=0).

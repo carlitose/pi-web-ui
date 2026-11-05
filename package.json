@@ -15,7 +15,9 @@
     "test": "vitest run",
     "build": "tsc -p tsconfig.json",
     "prepack": "npm run build",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:dist": "node scripts/check-dist.mjs --write",
+    "check:dist": "node scripts/check-dist.mjs"
   },
   "keywords": [
     "pi-package",

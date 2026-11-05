@@ -1,5 +1,7 @@
 node_modules/
-dist/
+# dist/ is versioned for installs from a GitHub archive; see scripts/check-dist.mjs.
+dist/**/test/
+.dist-check/
 coverage/
 .DS_Store
 *.log

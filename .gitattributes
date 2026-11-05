@@ -1,0 +1,3 @@
+# Keep the compiled output byte-identical to tsc (LF) on every checkout, so that
+# `npm run check:dist` compares real content instead of line-ending conversions.
+dist/** -text
