@@ -11,6 +11,11 @@ const readOnlyDomMethods = new Set([
 export function evaluateBrowserToolPermission(session: SessionState, tool: BrowserToolName, params: JsonObject = {}): ToolPermissionDecision {
   if (tool.startsWith('cookies.') && !session.cookieAccessEnabled) return { allowed: false, reason: 'Cookie access is disabled' };
   if (tool.startsWith('storage.') && !session.storageAccessEnabled) return { allowed: false, reason: 'Storage access is disabled' };
+  if (tool === 'tabs.create') {
+    let protocol = '';
+    try { protocol = new URL(String(params.url)).protocol; } catch { /* invalid URL */ }
+    if (protocol !== 'http:' && protocol !== 'https:') return { allowed: false, reason: 'Only http(s) pages can be opened' };
+  }
   if (tool === 'debugger.evaluateScript') return { allowed: false, requiresConfirmation: true, reason: 'Script evaluation requires confirmation' };
   if (tool === 'debugger.sendCdpCommand') {
     if (typeof params.method === 'string' && readOnlyDomMethods.has(params.method)) return { allowed: true };

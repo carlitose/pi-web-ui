@@ -8,6 +8,15 @@ export function evaluateBrowserToolPermission(session, tool, params = {}) {
         return { allowed: false, reason: 'Cookie access is disabled' };
     if (tool.startsWith('storage.') && !session.storageAccessEnabled)
         return { allowed: false, reason: 'Storage access is disabled' };
+    if (tool === 'tabs.create') {
+        let protocol = '';
+        try {
+            protocol = new URL(String(params.url)).protocol;
+        }
+        catch { /* invalid URL */ }
+        if (protocol !== 'http:' && protocol !== 'https:')
+            return { allowed: false, reason: 'Only http(s) pages can be opened' };
+    }
     if (tool === 'debugger.evaluateScript')
         return { allowed: false, requiresConfirmation: true, reason: 'Script evaluation requires confirmation' };
     if (tool === 'debugger.sendCdpCommand') {
