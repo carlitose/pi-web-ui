@@ -33,4 +33,54 @@ describe('browser client registry', () => {
 
     await expect(registry.requestBrowserTool('console.getLogs', {})).rejects.toThrow('No Chrome extension client connected');
   });
+
+  function profile(registry: ReturnType<typeof createBrowserClientRegistry>, tabs: number[], sent: Array<{ tool: string; params: unknown }>) {
+    const client = registry.addClient({
+      send(message) {
+        const request = JSON.parse(message);
+        sent.push({ tool: request.tool, params: request.params });
+        const data = request.tool === 'tabs.list' ? { tabs: tabs.map((id) => ({ id, url: `https://site-${id}` })) } : { text: `tab ${request.params.tabId}` };
+        queueMicrotask(() => client.receive(JSON.stringify({ id: request.id, type: 'browser_tool_response', success: true, data })));
+      },
+    });
+    return client;
+  }
+
+  it('lists tabs from every connected Chrome profile', async () => {
+    const registry = createBrowserClientRegistry();
+    profile(registry, [1, 2], []);
+    profile(registry, [30], []);
+
+    await expect(registry.requestBrowserTool('tabs.list', {})).resolves.toEqual({
+      tabs: [{ id: 1, url: 'https://site-1' }, { id: 2, url: 'https://site-2' }, { id: 30, url: 'https://site-30' }],
+    });
+  });
+
+  it('routes a tab tool to the profile that owns the tab, discovering it when unknown', async () => {
+    const registry = createBrowserClientRegistry();
+    const firstSent: Array<{ tool: string; params: unknown }> = [];
+    const secondSent: Array<{ tool: string; params: unknown }> = [];
+    profile(registry, [1], firstSent);
+    profile(registry, [30], secondSent);
+
+    await expect(registry.requestBrowserTool('page.getText', { tabId: 30 })).resolves.toEqual({ text: 'tab 30' });
+    expect(secondSent.map((entry) => entry.tool)).toEqual(['tabs.list', 'page.getText']);
+    expect(firstSent.map((entry) => entry.tool)).toEqual(['tabs.list']);
+  });
+
+  it('keeps other profiles listed when one profile fails, and forgets tabs of a disconnected profile', async () => {
+    const registry = createBrowserClientRegistry();
+    const broken = registry.addClient({
+      send(message) {
+        const request = JSON.parse(message);
+        queueMicrotask(() => broken.receive(JSON.stringify({ id: request.id, type: 'browser_tool_response', success: false, error: 'boom' })));
+      },
+    });
+    const sent: Array<{ tool: string; params: unknown }> = [];
+    const healthy = profile(registry, [7], sent);
+
+    await expect(registry.requestBrowserTool('tabs.list', {})).resolves.toEqual({ tabs: [{ id: 7, url: 'https://site-7' }] });
+    healthy.disconnect();
+    await expect(registry.requestBrowserTool('tabs.list', {})).rejects.toThrow('boom');
+  });
 });
