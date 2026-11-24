@@ -106,7 +106,8 @@ export function createBrowserClientRegistry(options = {}) {
             // Chrome process, so list tabs from every profile and route tab tools to the owner.
             if (tool === 'tabs.list')
                 return listAllTabs(requestOptions);
-            const tabId = params.tabId;
+            // tabs.create opens next to its opener, so it belongs to the opener's profile.
+            const tabId = typeof params.tabId === 'number' ? params.tabId : params.openerTabId;
             if (typeof tabId === 'number') {
                 if (!tabOwners.has(tabId) && sockets.size > 1)
                     await listAllTabs(requestOptions).catch(() => undefined);

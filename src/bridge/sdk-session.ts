@@ -87,6 +87,9 @@ const browserToolDescriptions: Record<string, { tool: string; description: strin
   browser_get_current_tab: { tool: 'tabs.getCurrent', description: 'Get the currently active browser tab. Returns a debuggerAttached boolean indicating whether the Chrome debugger is attached to this tab. If debuggerAttached is false, use browser_attach_debugger to attach to this tab first, or use browser_get_attached_tabs to see which tabs are being debugged.' },
   browser_get_page_html: { tool: 'page.getHtml', description: 'Get the full HTML of the current page.' },
   browser_get_page_text: { tool: 'page.getText', description: 'Get the visible text content of the current page.' },
+  browser_get_page_links: { tool: 'page.getLinks', description: 'List the links of a tab (text and absolute http(s) href), to find the address of the next page.' },
+  browser_open_page: { tool: 'tabs.create', description: 'Open an http(s) url in a new background tab next to openerTabId (same Chrome profile), wait for the load and return its tab id. The user\'s own tabs are never navigated.' },
+  browser_close_page: { tool: 'tabs.close', description: 'Close a tab previously opened with browser_open_page.' },
   browser_get_selection: { tool: 'page.getSelection', description: 'Get the currently selected text on the page.' },
   browser_capture_screenshot: { tool: 'page.captureScreenshot', description: 'Capture a screenshot of the current tab.' },
   browser_get_console_logs: {

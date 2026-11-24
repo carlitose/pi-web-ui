@@ -83,4 +83,16 @@ describe('browser client registry', () => {
     healthy.disconnect();
     await expect(registry.requestBrowserTool('tabs.list', {})).rejects.toThrow('boom');
   });
+
+  it('opens a page in the profile of its opener tab', async () => {
+    const registry = createBrowserClientRegistry();
+    const firstSent: Array<{ tool: string; params: unknown }> = [];
+    const secondSent: Array<{ tool: string; params: unknown }> = [];
+    profile(registry, [1], firstSent);
+    profile(registry, [30], secondSent);
+
+    await registry.requestBrowserTool('tabs.create', { url: 'https://www.hattrick.org/', openerTabId: 30 });
+    expect(secondSent.map((entry) => entry.tool)).toEqual(['tabs.list', 'tabs.create']);
+    expect(firstSent.map((entry) => entry.tool)).toEqual(['tabs.list']);
+  });
 });
